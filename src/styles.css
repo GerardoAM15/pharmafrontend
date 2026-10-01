@@ -1,0 +1,32 @@
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	color: #243447;
+	font-family: Georgia, 'Times New Roman', serif;
+	background: #f3f6fa;
+}
+
+button, input, textarea { font: inherit; }
+h2 { margin-top: 0; color: #123b63; }
+.page { max-width: 1180px; margin: 0 auto; }
+.card { padding: 28px; background: #fff; border: 1px solid #e1e8ef; border-radius: 8px; box-shadow: 0 8px 22px rgb(18 59 99 / 8%); }
+.bienvenida { max-width: 720px; }
+.eyebrow { margin: 0 0 8px; color: #c58a00; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5df; border-radius: 5px; color: inherit; background: #fff; }
+.btn { display: inline-block; padding: 9px 14px; border: 1px solid #cbd5df; border-radius: 5px; color: #243447; background: #fff; text-decoration: none; cursor: pointer; }
+.btn-primary { border-color: #123b63; color: #fff; background: #123b63; }
+.btn-peligro { border-color: #b42318; color: #b42318; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.alerta { margin-bottom: 16px; padding: 12px 16px; border-radius: 5px; color: #9f2118; background: #fff0ee; }
+.tabla { width: 100%; border-collapse: collapse; overflow: hidden; background: #fff; }
+.tabla th { padding: 11px 12px; color: #fff; text-align: left; background: #123b63; }
+.tabla td { padding: 11px 12px; border-bottom: 1px solid #e1e8ef; }
+.badge { padding: 3px 10px; border-radius: 999px; color: #17653a; background: #dcfce7; font-size: 13px; }
+.badge.inactivo { color: #64748b; background: #edf1f5; }
+
+@media (max-width: 700px) {
+	.page-header { align-items: flex-start; flex-direction: column; }
+	.tabla { display: block; overflow-x: auto; white-space: nowrap; }
+}

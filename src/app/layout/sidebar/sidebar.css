@@ -1,0 +1,29 @@
+:host { display: block; }
+
+.sidebar {
+  height: 100%;
+  min-width: 240px;
+  padding: 18px 12px;
+  background: #fff;
+  border-right: 1px solid #d9e1ea;
+}
+
+.titulo {
+  margin: 0 8px 10px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: #243447;
+  text-decoration: none;
+}
+
+a:hover { background: #edf3f8; }
+a.activo { background: #123b63; color: #fff; }
