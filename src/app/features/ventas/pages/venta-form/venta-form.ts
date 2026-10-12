@@ -175,6 +175,8 @@ export class VentaForm implements OnInit {
   }
 
   confirmar(): void {
+    if (this.guardando()) return;
+
     const valor = this.form.getRawValue();
     const dto: VentaRequest = {
       clienteId: Number(valor.clienteId),

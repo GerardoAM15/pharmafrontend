@@ -1,0 +1,95 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <p class="subtitulo">Análisis comercial</p>
+      <h2>Ventas por categoría</h2>
+      <p class="descripcion">Compara unidades vendidas e ingresos por categoría.</p>
+    </div>
+  </header>
+
+  <form class="card filtros" [formGroup]="filtros" (ngSubmit)="generar()">
+    <label>
+      Desde
+      <input class="input" type="date" formControlName="desde" aria-label="Fecha desde" />
+    </label>
+    <label>
+      Hasta
+      <input class="input" type="date" formControlName="hasta" aria-label="Fecha hasta" />
+    </label>
+    <div class="acciones">
+      <button class="btn" type="button" (click)="limpiar()" [disabled]="cargando()">Limpiar</button>
+      <button class="btn btn-primary" type="submit" [disabled]="cargando()">
+        {{ cargando() ? 'Generando…' : 'Generar reporte' }}
+      </button>
+    </div>
+  </form>
+
+  @if (error()) {
+    <div class="alerta" role="alert">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga" role="status">
+      <span class="indicador-carga" aria-hidden="true"></span>
+      <span>Consultando ventas por categoría…</span>
+    </div>
+  } @else if (ventas(); as filas) {
+    @if (filas.length > 0) {
+      <div class="resumen">
+        <article class="indicador card">
+          <span>Unidades vendidas</span>
+          <strong>{{ totalUnidades() }}</strong>
+        </article>
+        <article class="indicador card">
+          <span>Venta total</span>
+          <strong>{{ montoGeneral() | currency: 'PEN' : 'S/ ' }}</strong>
+        </article>
+      </div>
+
+      <div class="tabla-contenedor card">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Categoría</th>
+              <th scope="col" class="numero">Unidades vendidas</th>
+              <th scope="col" class="numero">Monto total</th>
+              <th scope="col">Comparación de ventas</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (venta of filas; track venta.categoriaId) {
+              <tr>
+                <th scope="row">{{ venta.categoriaNombre }}</th>
+                <td class="numero">{{ venta.cantidadVendida }}</td>
+                <td class="numero monto">{{ venta.montoTotal | currency: 'PEN' : 'S/ ' }}</td>
+                <td>
+                  <div
+                    class="barra-fondo"
+                    role="img"
+                    [attr.aria-label]="venta.categoriaNombre + ': ' + (anchoBarra(venta.montoTotal) | number: '1.0-0') + '% del monto mayor'"
+                  >
+                    <div class="barra" [style.width.%]="anchoBarra(venta.montoTotal)"></div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">Total general</th>
+              <td class="numero">{{ totalUnidades() }}</td>
+              <td class="numero monto">{{ montoGeneral() | currency: 'PEN' : 'S/ ' }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    } @else {
+      <div class="estado-vacio card" role="status">
+        <span class="vacio-icono" aria-hidden="true">▤</span>
+        <h3>No hay ventas en el periodo seleccionado</h3>
+        <p>Prueba con otro rango de fechas o consulta el histórico sin filtros.</p>
+      </div>
+    }
+  }
+</section>

@@ -1,0 +1,251 @@
+{
+  "info": {
+    "_postman_id": "ba2f39d7-62d5-4f2a-91b5-91f3d023b911",
+    "name": "PharmaSoft - S9 Ventas",
+    "description": "Colección para verificar ventas y el reporte por categoría. Requiere PharmaBackend local; usa registros ficticios de QA. Las solicitudes POST crean ventas persistentes. Para M-01, reinicia el stock del producto de prueba a 2 en una base desechable y ejecuta ambas solicitudes al mismo tiempo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Reporte de ventas",
+      "item": [
+        {
+          "name": "R-01 · Histórico por categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reportes/ventas-por-categoria"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200 y lista de categorías', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "R-02 · Filtro de fechas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/ventas-por-categoria?desde={{desde}}&hasta={{hasta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "ventas-por-categoria"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "{{desde}}"
+                },
+                {
+                  "key": "hasta",
+                  "value": "{{hasta}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200 y lista filtrada', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Validaciones de ventas",
+      "item": [
+        {
+          "name": "V-05 · Producto repetido en dos líneas (hallazgo observado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{clienteActivoId}},\n  \"detalles\": [\n    { \"productoId\": {{productoExtraId}}, \"cantidad\": 1 },\n    { \"productoId\": {{productoExtraId}}, \"cantidad\": 1 }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/ventas",
+            "description": "Prueba persistente: la API respondió HTTP 201 con dos líneas del mismo producto y total duplicado. Ejecútala solo en una base de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('La API devuelve una venta', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([201, 400, 409]);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  pm.test('V-05 sigue reportado hasta que el backend aplique la regla acordada', function () {",
+                  "    const detalles = pm.response.json().detalles;",
+                  "    pm.expect(detalles.filter(d => d.productoId === Number(pm.variables.get('productoExtraId'))).length).to.equal(1);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M-02 · Cliente inactivo debe ser rechazado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{clienteInactivoId}},\n  \"detalles\": [{ \"productoId\": {{productoExtraId}}, \"cantidad\": 1 }]\n}"
+            },
+            "url": "{{baseUrl}}/ventas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409 para cliente inactivo', function () {",
+                  "  pm.response.to.have.status(409);",
+                  "  pm.expect(pm.response.json().message).to.include('cliente inactivo');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M-01A · Competidor A (ejecutar simultáneamente con M-01B)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{clienteActivoId}},\n  \"detalles\": [{ \"productoId\": {{productoStock2Id}}, \"cantidad\": 2 }]\n}"
+            },
+            "url": "{{baseUrl}}/ventas",
+            "description": "El resultado esperado es que solo una de las dos solicitudes simultáneas registre venta (201) y la otra reciba 409."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Una ejecución aislada puede registrar o detectar el conflicto', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "M-01B · Competidor B (ejecutar simultáneamente con M-01A)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{clienteSecundarioId}},\n  \"detalles\": [{ \"productoId\": {{productoStock2Id}}, \"cantidad\": 2 }]\n}"
+            },
+            "url": "{{baseUrl}}/ventas",
+            "description": "Inicia esta solicitud al mismo tiempo que M-01A; no las ejecutes en serie."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Una ejecución aislada puede registrar o detectar el conflicto', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081/api/v1"
+    },
+    {
+      "key": "desde",
+      "value": "2026-10-11"
+    },
+    {
+      "key": "hasta",
+      "value": "2026-10-11"
+    },
+    {
+      "key": "clienteActivoId",
+      "value": "1"
+    },
+    {
+      "key": "clienteSecundarioId",
+      "value": "2"
+    },
+    {
+      "key": "clienteInactivoId",
+      "value": "4"
+    },
+    {
+      "key": "productoStock2Id",
+      "value": "6"
+    },
+    {
+      "key": "productoPrecio1890Id",
+      "value": "7"
+    },
+    {
+      "key": "productoExtraId",
+      "value": "8"
+    }
+  ]
+}
