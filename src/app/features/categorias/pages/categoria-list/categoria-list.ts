@@ -16,6 +16,8 @@ export class CategoriaList implements OnInit {
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly cargando = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly categoriaPorEliminar = signal<Categoria | null>(null);
+  protected readonly eliminando = signal(false);
   protected readonly filtro = signal('');
   protected readonly filtradas = computed(() => {
     const texto = this.filtro().trim().toLowerCase();
@@ -42,13 +44,32 @@ export class CategoriaList implements OnInit {
   }
 
   eliminar(categoria: Categoria): void {
-    if (!confirm(`¿Eliminar la categoría "${categoria.nombre}"?`)) {
-      return;
-    }
+    this.error.set(null);
+    this.categoriaPorEliminar.set(categoria);
+  }
 
+  cancelarEliminacion(): void {
+    if (!this.eliminando()) {
+      this.categoriaPorEliminar.set(null);
+    }
+  }
+
+  confirmarEliminacion(): void {
+    const categoria = this.categoriaPorEliminar();
+    if (!categoria || this.eliminando()) return;
+
+    this.eliminando.set(true);
     this.categoriaService.eliminar(categoria.id).subscribe({
-      next: () => this.categorias.update(lista => lista.filter(item => item.id !== categoria.id)),
-      error: (err: HttpErrorResponse) => this.error.set(mensajeError(err)),
+      next: () => {
+        this.categorias.update(lista => lista.filter(item => item.id !== categoria.id));
+        this.categoriaPorEliminar.set(null);
+        this.eliminando.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(mensajeError(err));
+        this.eliminando.set(false);
+        this.categoriaPorEliminar.set(null);
+      },
     });
   }
 }

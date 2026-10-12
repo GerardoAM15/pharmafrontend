@@ -39,3 +39,43 @@
     </table>
   }
 </section>
+
+@if (categoriaPorEliminar(); as categoria) {
+  <div class="modal-fondo" (click)="cancelarEliminacion()" (keydown.escape)="cancelarEliminacion()">
+    <section
+      class="modal-eliminar"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="titulo-eliminar-categoria"
+      aria-describedby="descripcion-eliminar-categoria"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-icono" aria-hidden="true">!</div>
+      <p class="modal-eyebrow">Confirmar acción</p>
+      <h2 id="titulo-eliminar-categoria">¿Eliminar esta categoría?</h2>
+      <p id="descripcion-eliminar-categoria" class="modal-descripcion">
+        La categoría dejará de estar disponible en el catálogo. Si tiene productos asociados, el sistema no permitirá eliminarla y mostrará el motivo.
+      </p>
+
+      <div class="categoria-resumen">
+        <span class="resumen-icono" aria-hidden="true">▦</span>
+        <span class="resumen-datos">
+          <strong>{{ categoria.nombre }}</strong>
+          <small>{{ categoria.descripcion || 'Sin descripción' }}</small>
+        </span>
+        <span class="estado-categoria" [class.inactivo]="!categoria.estado">
+          {{ categoria.estado ? 'Activa' : 'Inactiva' }}
+        </span>
+      </div>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn modal-cancelar" [disabled]="eliminando()" (click)="cancelarEliminacion()">
+          Cancelar
+        </button>
+        <button type="button" class="btn modal-confirmar" [disabled]="eliminando()" (click)="confirmarEliminacion()">
+          {{ eliminando() ? 'Eliminando…' : 'Sí, eliminar categoría' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

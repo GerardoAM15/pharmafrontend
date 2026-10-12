@@ -59,7 +59,8 @@
               "buildTarget": "pharma-frontend:build:production"
             },
             "development": {
-              "buildTarget": "pharma-frontend:build:development"
+              "buildTarget": "pharma-frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

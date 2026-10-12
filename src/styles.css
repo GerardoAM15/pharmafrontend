@@ -26,6 +26,20 @@ h2 { margin-top: 0; color: #123b63; }
 .badge { padding: 3px 10px; border-radius: 999px; color: #17653a; background: #dcfce7; font-size: 13px; }
 .badge.inactivo { color: #64748b; background: #edf1f5; }
 
+.solo-impresion { display: none; }
+
+@media print {
+	@page { size: A4; margin: 12mm; }
+	* { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+	body { background: #fff; }
+	.no-imprimir { display: none !important; }
+	.solo-impresion { display: block; }
+	.card { box-shadow: none; border-radius: 0; padding: 0; }
+	.tabla { border-radius: 0; }
+	.tabla th { background: #fff; color: #000; border-bottom: 2px solid #123b63; }
+	.tabla tr { break-inside: avoid; }
+}
+
 @media (max-width: 700px) {
 	.page-header { align-items: flex-start; flex-direction: column; }
 	.tabla { display: block; overflow-x: auto; white-space: nowrap; }
